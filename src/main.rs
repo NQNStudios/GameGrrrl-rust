@@ -23,10 +23,17 @@ struct Registers {
 }
 
 struct MMU {
-    ram: Vec<u8>
+    ram: Vec<u8>,
+
+    /*const CARTRIDGE_ROM_1_INDEX = 0,*/
+    /*const CARTRIDGE_ROM_2_INDEX = 16_384,*/
+    /*const GRAPHICS_RAM_INDEX = */
 }
 
 impl MMU {
+    // TODO MMU needs to eventually contain offset constants for different
+    // regions of RAM
+
     fn new(capacity: usize) -> MMU {
         let mut mmu = MMU {
             ram: vec![]
@@ -72,7 +79,8 @@ impl MMU {
 
 struct Z80 {
     clock: Clock,
-    r: Registers
+    r: Registers,
+    mmu: MMU
 }
 
 impl Z80 {
@@ -94,7 +102,9 @@ impl Z80 {
                 sp: 0,
                 m: 0,
                 t: 0
-            }
+            },
+            // The gameboy can access 65,536 locations in memory
+            mmu: MMU::new(65_536),
         }
     }
 
@@ -146,6 +156,50 @@ impl Z80 {
     fn nop(&mut self) {
         self.r.m = 1; 
         self.r.t = 4;
+    }
+
+    fn push_b_c(&mut self) {
+        self.r.sp -= 1;
+        self.mmu.wb(self.r.sp, self.r.b);
+        self.r.sp -= 1;
+        self.mmu.wb(self.r.sp, self.r.c);
+        self.r.m = 3;
+        self.r.t = 12;
+    }
+
+    fn pop_h_l(&mut self) {
+        self.r.l = self.mmu.rb(self.r.sp);
+        self.r.sp += 1;
+        self.r.h = self.mmu.rb(self.r.sp);
+        self.r.sp += 1;
+        self.r.m = 3;
+        self.r.t = 12;
+    }
+
+    fn ld_a_mm(&mut self) {
+        let addr = self.mmu.rw(self.r.pc);
+        self.r.pc += 2;
+        self.r.a = self.mmu.rb(addr);
+        self.r.m = 4;
+        self.r.t = 16;
+    }
+
+    fn reset(&mut self) {
+        // reset all registers
+        self.r.a = 0;
+        self.r.b = 0;
+        self.r.c = 0;
+        self.r.d = 0;
+        self.r.e = 0;
+        self.r.h = 0;
+        self.r.l = 0;
+        self.r.f = 0;
+        self.r.sp = 0;
+        // Start execution at 0
+        self.r.pc = 0;
+        // reset the clock
+        self.clock.m = 0;
+        self.r.clock.t = 0;
     }
 }
 
