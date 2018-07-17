@@ -1,0 +1,6 @@
+[package]
+name = "GameGrrrl-rust"
+version = "0.1.0"
+authors = ["Nat Quayle Nelson <natquaylenelson@gmail.com>"]
+
+[dependencies]
