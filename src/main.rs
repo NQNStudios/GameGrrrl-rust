@@ -1,3 +1,5 @@
+use std::path::Pathbuf;
+
 #[derive(Default)]
 struct Clock {
     m: u16, // TODO we are assuming m and t are unsigned 16-bit.
@@ -81,6 +83,14 @@ impl MMU {
         self.ram[addr*2] = big as u8;
         self.ram[addr*2+1] = little as u8;
     }
+    fn load(&mut self, path: Pathbuf) {
+        let mut file = File::open(path).expect("");
+        let binary = file.read.expect("");
+        for (addr, byte) in binary.into_iter().enumerate() {
+            self.ram[addr] = byte;
+        }
+
+    }
 }
 
 struct Z80 {
@@ -129,7 +139,7 @@ impl Z80 {
         // Check for a carry
         if sum > 255 {
             // Set the underflow/overflow flag (00010000)
-            self.r.f |= 0x10; 
+            self.r.f |= 0x10;
             self.r.a = 0;
         }
 
@@ -155,12 +165,12 @@ impl Z80 {
         if temp < 0 {
             // Set the underflow/overflow flag (00010000)
         }
-        self.r.m = 1; 
+        self.r.m = 1;
         self.r.t = 4;
     }
 
     fn nop(&mut self) {
-        self.r.m = 1; 
+        self.r.m = 1;
         self.r.t = 4;
     }
 
