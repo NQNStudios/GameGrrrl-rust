@@ -25,9 +25,15 @@ struct Registers {
 struct MMU {
     ram: Vec<u8>,
 
-    /*const CARTRIDGE_ROM_1_INDEX = 0,*/
-    /*const CARTRIDGE_ROM_2_INDEX = 16_384,*/
-    /*const GRAPHICS_RAM_INDEX = */
+    const CARTRIDGE_ROM_0_ADDR = 0,
+    const CARTRIDGE_ROM_1_ADDR = 16_384,
+    const GRAPHICS_RAM_ADDR = 32_768,
+    const CARTRIDGE_EXTERNAL_RAM_ADDR = 40_960,
+    const WORKING_RAM_ADDR = 49_152,
+    const WORKING_RAM_SHADOW_ADDR = 57_344,
+    const GRAPHICS_SPRITE_INFO_ADDR = 65_024,
+    const MEMORY_MAPPED_IO_ADDR = 65_280,
+    const ZERO_PAGE_RAM_ADDR = 65_408,
 }
 
 impl MMU {
